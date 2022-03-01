@@ -140,7 +140,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You now have "+ config.balance() + " " + config.currencyName(), null);
 				break;
 			case "set":
-				config.setBalance(config.balance());
+				config.setBalance(Integer.parseInt(commandExecuted.getArguments()[0]));
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You now have "+ config.balance() + " " + config.currencyName(), null);
 			default:
 				break;

@@ -4,8 +4,9 @@ Tracks your personal made up currency; Can add/remove/check amount
 # Changing the amount #
 There are 2 ways to change the amount
 1. Use the commands
-   - ```::add x``` adds x coins to your balance
-   - ```::remove x``` removes x coins from your balance
+   - ```::add x``` adds ```x``` coins to your balance
+   - ```::remove x``` removes ```x``` coins from your balance
+   - ```::set x``` sets your balance to ```x``` 
 2. Change it manually through the Config Panel
 
 # Checking the Amount #

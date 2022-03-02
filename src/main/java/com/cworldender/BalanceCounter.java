@@ -7,18 +7,20 @@ import java.awt.image.BufferedImage;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.ui.overlay.infobox.Counter;
 
-public class BalanceCounter extends Counter{
-    @Getter
-    private final String name;
+public class BalanceCounter extends Counter
+{
+	@Getter
+	private final String name;
 
-    BalanceCounter(Plugin plugin, int count, String pName, BufferedImage image){
-        super(image, plugin, count);
-        name = pName;
-    }
+	BalanceCounter(Plugin plugin, int count, String pName, BufferedImage image)
+	{
+		super(image, plugin, count);
+		name = pName;
+	}
 
-    @Override
-    public String getTooltip()
-    {
-        return name;
-    }
+	@Override
+	public String getTooltip()
+	{
+		return name;
+	}
 }

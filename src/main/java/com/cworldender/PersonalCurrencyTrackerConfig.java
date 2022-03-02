@@ -18,32 +18,41 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "balance",
-			name = "Balance",
-			description = "How much money do you have?"
+		keyName = "balance",
+		name = "Balance",
+		description = "How much money do you have?"
 	)
-	default int balance() { return 0;}
+	default int balance()
+	{
+		return 0;
+	}
 
 	@ConfigItem(
-			keyName = "balance",
-			name = "Balance",
-			description = "How much money do you have?"
+		keyName = "balance",
+		name = "Balance",
+		description = "How much money do you have?"
 	)
 	void setBalance(int balance);
 
 	@ConfigItem(
-			keyName = "cointype",
-			name = "Coin Type",
-			description = "The type of coin to use as your Currency"
+		keyName = "cointype",
+		name = "Coin Type",
+		description = "The type of coin to use as your Currency"
 	)
-	default CoinType cointype() { return CoinType.BLOOD_MONEY; }
+	default CoinType cointype()
+	{
+		return CoinType.BLOOD_MONEY;
+	}
 
 	@ConfigItem(
-			keyName = "infopanel",
-			name = "Info Panel",
-			description = "Show the info panel"
+		keyName = "infopanel",
+		name = "Info Panel",
+		description = "Show the info panel"
 	)
-	default boolean infopanel() { return true; }
+	default boolean infopanel()
+	{
+		return true;
+	}
 
 // Removed until I figure out how to find out the different images for one type of item. Ideally getting an array of all different coin stacks for one type of coin, then just figure out which image to choose
 //	@ConfigItem(

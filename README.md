@@ -1,4 +1,4 @@
-# Personal Currency Tracker #
+# Personal Currency Tracker [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/personalcurrencytracker)](https://runelite.net/plugin-hub) [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/personalcurrencytracker)](https://runelite.net/plugin-hub) #
 Tracks your personal made up currency; Can add/remove/check amount
 
 # Changing the amount #

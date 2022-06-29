@@ -14,4 +14,6 @@ There are 2 ways to change the amount
 2. Use the command ```::count```
 
 # Custom Coin Image #
-To use a custom image, set the Coin Type option to ```Custom``` in the Config Panel, and place your image named ```coin.png``` in ```%userprofile%\.runelite``` on Windows or ```~/.runelite/``` on Linux/MacOS.
+To use a custom image, set the Coin Type option to `Custom` in the Config Panel, and place your image named ```coin.png``` in ```%userprofile%\.runelite``` on Windows or `~/.runelite/` on Linux/MacOS.
+
+If this does not work, try renaming your coin image to just `coin`.

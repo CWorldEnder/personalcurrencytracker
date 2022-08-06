@@ -2,12 +2,21 @@ package com.cworldender;
 
 import com.google.inject.Provides;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.Actor;
+import net.runelite.api.Player;
+import net.runelite.api.ScriptID;
+import net.runelite.api.VarClientStr;
+import net.runelite.api.events.ActorDeath;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.CommandExecuted;
+import net.runelite.api.events.ScriptPreFired;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -20,7 +29,7 @@ import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.File;
-
+import net.runelite.client.util.Text;
 
 
 @Slf4j
@@ -30,6 +39,7 @@ import java.io.File;
 public class PersonalCurrencyTrackerPlugin extends Plugin
 {
 	private static final File CUSTOM_COIN_IMAGE = new File(RuneLite.RUNELITE_DIR, "coin.png");
+	private boolean notificationStarted;
 
 	@Inject
 	private Client client;
@@ -55,6 +65,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	protected void shutDown()
 	{
 		infoBoxManager.removeInfoBox(balanceBox);
+		notificationStarted = false;
 		log.info("Personal Currency Tracker stopped!");
 	}
 
@@ -67,6 +78,120 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		}
 	}
 
+	private void incrementBalance(int amount)
+	{
+		config.setBalance(config.balance() + amount);
+	}
+
+	private void setBalance(int amount)
+	{
+		config.setBalance(amount);
+	}
+
+	@Subscribe
+	protected void onChatMessage(ChatMessage message)
+	{
+		// A large portion of this is very heavily inspired by the screenshot plugin
+		// https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/screenshot/ScreenshotPlugin.java
+		if (message.getType() != ChatMessageType.GAMEMESSAGE
+			&& message.getType() != ChatMessageType.SPAM
+			&& message.getType() != ChatMessageType.TRADE
+			&& message.getType() != ChatMessageType.FRIENDSCHATNOTIFICATION)
+		{
+			return;
+		}
+
+		String msg = message.getMessage();
+
+		// Clue completion
+		if (
+			config.useCaskets()
+			&& msg.contains("You have completed") && msg.contains("Treasure")
+		)
+		{
+			Pattern NUMBER_PATTERN = Pattern.compile("([0-9]+)");
+			Matcher m = NUMBER_PATTERN.matcher(Text.removeTags(msg));
+			if (m.find()){
+				String clueType = msg.substring(msg.lastIndexOf(m.group()) + m.group().length() + 1, msg.indexOf("Treasure") - 1);
+
+				// Honestly, there has got to be a better way
+				switch(clueType.toLowerCase()){
+					case "beginner":
+						incrementBalance(config.beginnerReward());
+						break;
+					case "easy":
+						incrementBalance(config.easyReward());
+						break;
+					case "medium":
+						incrementBalance(config.mediumReward());
+						break;
+					case "hard":
+						incrementBalance(config.hardReward());
+						break;
+					case "elite":
+						incrementBalance(config.eliteReward());
+						break;
+					case "master":
+						incrementBalance(config.masterReward());
+						break;
+					default:
+						break;
+				}
+			} else if (msg.startsWith("New item added to your collection log:") && config.collLogReward() != 0)
+			{
+				// String[] itemname = msg.split("New item added to your collection log: ")[1];
+				// New Collection log slot --> Update balance
+				incrementBalance(config.collLogReward());
+			}
+		}
+	}
+
+	@Subscribe
+	public void onScriptPreFired(ScriptPreFired scriptPreFired)
+	{
+		// Adapted from Screenshot plugin
+		// https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/screenshot/ScreenshotPlugin.java
+		switch (scriptPreFired.getScriptId())
+		{
+			case ScriptID.NOTIFICATION_START:
+				notificationStarted = true;
+				break;
+			case ScriptID.NOTIFICATION_DELAY:
+				if (!notificationStarted)
+				{
+					return;
+				}
+				String topText = client.getVarcStrValue(VarClientStr.NOTIFICATION_TOP_TEXT);
+				String bottomText = client.getVarcStrValue(VarClientStr.NOTIFICATION_BOTTOM_TEXT);
+				if (topText.equalsIgnoreCase("Collection log") && config.collLogReward() != 0)
+				{
+					// String entry = Text.removeTags(bottomText).substring("New item:".length());
+					incrementBalance(config.collLogReward());
+				}
+//				if (topText.equalsIgnoreCase("Combat Task Completed!") && config.combatTaskReward() != 0 && client.getVarbitValue(Varbits.COMBAT_ACHIEVEMENTS_POPUP) == 0)
+//				{
+//					//String entry = Text.removeTags(bottomText).substring("Task Completed: ".length());
+//					incrementBalance(config.combatTaskReward());
+//				}
+				notificationStarted = false;
+				break;
+		}
+	}
+
+
+	@Subscribe
+	public void onActorDeath(ActorDeath actorDeath)
+	{
+		Actor actor = actorDeath.getActor();
+		if (actor instanceof Player)
+		{
+			Player player = (Player) actor;
+			if (player == client.getLocalPlayer())
+			{
+				incrementBalance(config.deathReward());
+			}
+		}
+	}
 
 	private void updateInfobox(int newCount)
 	{
@@ -85,13 +210,13 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	{
 		if (config.infopanel())
 		{
-			final BufferedImage image = getCoinImage(250);
+			final BufferedImage image = getCoinImage();
 			balanceBox = new BalanceCounter(this, config.balance(), config.currencyName(), image);
 			infoBoxManager.addInfoBox(balanceBox);
 		}
 	}
 
-	private BufferedImage getCoinImage(int count)
+	private BufferedImage getCoinImage()
 	{
 		if (config.cointype() == CoinType.CUSTOM)
 		{
@@ -149,7 +274,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				if (arg.isValid())
 				{
 					int increment = arg.getValue();
-					config.setBalance(config.balance() + increment);
+					incrementBalance(increment);
 					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You now have " + config.balance() + " " + config.currencyName(), null);
 				}
 				break;
@@ -158,14 +283,15 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				if (arg.isValid())
 				{
 					int sub = Integer.parseInt(commandExecuted.getArguments()[0]);
-					config.setBalance(config.balance() - sub);
+					incrementBalance(-sub);
 					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You now have " + config.balance() + " " + config.currencyName(), null);
 				}
 				break;
 			case "set":
 				if (arg.isValid())
 				{
-					config.setBalance(Integer.parseInt(commandExecuted.getArguments()[0]));
+					int amount = Integer.parseInt(commandExecuted.getArguments()[0]);
+					setBalance(amount);
 					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You now have " + config.balance() + " " + config.currencyName(), null);
 				}
 			default:

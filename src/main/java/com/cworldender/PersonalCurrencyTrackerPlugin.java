@@ -162,17 +162,17 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 					return;
 				}
 				String topText = client.getVarcStrValue(VarClientStr.NOTIFICATION_TOP_TEXT);
-				String bottomText = client.getVarcStrValue(VarClientStr.NOTIFICATION_BOTTOM_TEXT);
+				// String bottomText = client.getVarcStrValue(VarClientStr.NOTIFICATION_BOTTOM_TEXT);
 				if (topText.equalsIgnoreCase("Collection log") && config.collLogReward() != 0)
 				{
 					// String entry = Text.removeTags(bottomText).substring("New item:".length());
 					incrementBalance(config.collLogReward());
 				}
-//				if (topText.equalsIgnoreCase("Combat Task Completed!") && config.combatTaskReward() != 0 && client.getVarbitValue(Varbits.COMBAT_ACHIEVEMENTS_POPUP) == 0)
-//				{
-//					//String entry = Text.removeTags(bottomText).substring("Task Completed: ".length());
-//					incrementBalance(config.combatTaskReward());
-//				}
+				// if (topText.equalsIgnoreCase("Combat Task Completed!") && config.combatTaskReward() != 0 && client.getVarbitValue(Varbits.COMBAT_ACHIEVEMENTS_POPUP) == 0)
+				// {
+				// 	//String entry = Text.removeTags(bottomText).substring("Task Completed: ".length());
+				// 	incrementBalance(config.combatTaskReward());
+				// }
 				notificationStarted = false;
 				break;
 		}

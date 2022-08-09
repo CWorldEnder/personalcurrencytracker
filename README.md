@@ -31,4 +31,4 @@ Notably:
 
 ---
 
-If you have ideas/wishes for other balance update options, you can let me know by creating an issue :D .
+If you have ideas/wishes for other balance update options, you can let me know by creating an issue :smile: .

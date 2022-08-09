@@ -17,3 +17,18 @@ There are 2 ways to change the amount
 To use a custom image, set the Coin Type option to `Custom` in the Config Panel, and place your image named ```coin.png``` in ```%userprofile%\.runelite``` on Windows or `~/.runelite/` on Linux/MacOS.
 
 If this does not work, try renaming your coin image to just `coin`.
+
+# Automatic Balance Updates
+
+You can also have your balance automatically update by specified amounts
+
+![](readme_img/automatic_balance_updates.png)
+
+Notably:
+
+- The casket opening rewards are ***only granted*** if the `Update on Clue Caskets` option is enabled (To make disabling them easy without setting them all to 0).
+- In the miscellaneous section you can set rewards for *new collection log slots*, however this makes no distinction based on the category it belongs to in the collection log (*soon&trade;*).
+
+---
+
+If you have ideas/wishes for other balance update options, you can let me know by creating an issue :D .

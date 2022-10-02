@@ -2,21 +2,29 @@ package com.cworldender;
 
 import com.google.inject.Provides;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.HashMap;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Actor;
+import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.ScriptID;
 import net.runelite.api.VarClientStr;
 import net.runelite.api.events.ActorDeath;
+import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.ScriptPreFired;
+import net.runelite.api.events.HitsplatApplied;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -40,6 +48,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 {
 	private static final File CUSTOM_COIN_IMAGE = new File(RuneLite.RUNELITE_DIR, "coin.png");
 	private boolean notificationStarted;
+	private HashMap<String, Integer> npcRewardsMap; // Stores NPC name -> kill reward with npc name in lowercase
+	private final Set<Actor> taggedActors = new HashSet<>();
 
 	@Inject
 	private Client client;
@@ -59,6 +69,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	{
 		log.info("Personal Currency Tracker started!");
 		createInfoBox();
+		updateNPCKillRewardMap(config.npcKillRewards());
 	}
 
 	@Override
@@ -66,15 +77,17 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	{
 		infoBoxManager.removeInfoBox(balanceBox);
 		notificationStarted = false;
+		taggedActors.clear();
 		log.info("Personal Currency Tracker stopped!");
 	}
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged)
 	{
-		if (configChanged.getGroup().equals("personalcurrencytracker"))
+		if (configChanged.getGroup().equals(config.GROUP))
 		{
 			updateInfobox(config.balance());
+			updateNPCKillRewardMap(config.npcKillRewards());
 		}
 	}
 
@@ -191,18 +204,47 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				incrementBalance(config.deathReward());
 			}
 		}
+
+		if(taggedActors.contains(actor)){
+			incrementBalance(
+				npcRewardsMap.getOrDefault(Objects.requireNonNull(actor.getName()).toLowerCase(), 0)
+			);
+			taggedActors.remove(actor);
+		}
 	}
 
+	@Subscribe
+	public void onHitsplatApplied(HitsplatApplied hitsplatApplied){
+		Actor actor = hitsplatApplied.getActor();
+
+		if(actor != null && hitsplatApplied.getHitsplat().isMine() && npcRewardsMap.containsKey(actor.getName().toLowerCase())){
+			taggedActors.add((NPC) actor);
+		}
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned npcDespawned)
+	{
+		taggedActors.remove(npcDespawned.getNpc());
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	{
+		switch(gameStateChanged.getGameState()){
+			case HOPPING:
+			case LOGGING_IN:
+				taggedActors.clear();
+		}
+	}
 	private void updateInfobox(int newCount)
 	{
-		if (balanceBox != null)
-		{
-//			balanceBox.setCount(config.balance());
+		if (balanceBox != null) { // Destroy the infopanel
 			infoBoxManager.removeInfoBox(balanceBox);
-			if (config.infopanel())
-			{ // Only recreate the infobox if it should be shown
-				createInfoBox();
-			}
+		}
+		if (config.infopanel()) // Recreate infopanel if it should be shown
+		{
+			createInfoBox();
 		}
 	}
 
@@ -243,6 +285,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 	private int getItemIdForCoin(CoinType coin)
 	{
+	// TODO: Extract this into another file?
 		switch (coin)
 		{
 			case COINS:
@@ -337,6 +380,33 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		{
 			return value;
 		}
+	}
+
+	private void updateNPCKillRewardMap(String configStr) throws IllegalArgumentException{
+		/*
+		 * configStr is a string of comma-separated 'npc-name#kill-reward' pairs.
+		 * Turn this into hashmap mapping name to reward.
+		 */
+
+		HashMap<String, Integer> tempMap = new HashMap<>(); // We don't just want to write over the previous map in case items were deleted
+		if(!configStr.equals("")){
+			String[] pairs = configStr.split(",");
+			for (String s : pairs)
+			{
+				if(s.contains("#")){
+					String[] pair = s.trim().toLowerCase().split("#");
+					if (pair.length != 2)
+					{
+						throw new IllegalArgumentException("PersonalCurrencyTracker: An (NPC, Kill-Reward) pair has more than 2 components!");
+					}
+					else
+					{
+						tempMap.put(pair[0].trim(), Integer.parseInt(pair[1].trim()));
+					}
+				}
+			}
+		}
+		npcRewardsMap = tempMap;
 	}
 
 	@Provides

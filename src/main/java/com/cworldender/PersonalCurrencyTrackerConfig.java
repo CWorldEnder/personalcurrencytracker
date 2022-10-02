@@ -6,9 +6,10 @@ import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
 
-@ConfigGroup("personalcurrencytracker")
+@ConfigGroup(PersonalCurrencyTrackerConfig.GROUP)
 public interface PersonalCurrencyTrackerConfig extends Config
 {
+	String GROUP = "personalcurrencytracker";
 
 	@ConfigItem(
 		keyName = "currencyName",
@@ -183,6 +184,15 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	default int deathReward(){
 		return 0;
 	}
+
+	@ConfigItem(
+		keyName = "npcKillRewards",
+		name = "Reward for NPC Kills",
+		description = "Reward for killing an NPC. Formatted as comma-separated list of npc-name#reward pairs.",
+		section = miscEventsSection,
+		position = 2
+	)
+	default String npcKillRewards(){ return ""; }
 
 // Removed until I figure out how to find out the different images for one type of item. Ideally getting an array of all different coin stacks for one type of coin, then just figure out which image to choose
 //	@ConfigItem(

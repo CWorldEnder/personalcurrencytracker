@@ -300,7 +300,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 	private int getItemIdForCoin(CoinType coin)
 	{
-	// TODO: Extract this into another file?
+	// TODO: Extract this into another class?
 		switch (coin)
 		{
 			case COINS:

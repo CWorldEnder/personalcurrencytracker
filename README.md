@@ -1,5 +1,4 @@
 # Personal Currency Tracker [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/personalcurrencytracker)](https://runelite.net/plugin-hub) [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/personalcurrencytracker)](https://runelite.net/plugin-hub) #
-Tracks your personal made up currency; Can add/remove/check amount
 
 # Changing the amount #
 There are 2 ways to change the amount
@@ -14,7 +13,7 @@ There are 2 ways to change the amount
 2. Use the command ```::count```
 
 # Custom Coin Image #
-To use a custom image, set the Coin Type option to `Custom` in the Config Panel, and place your image named ```coin.png``` in ```%userprofile%\.runelite``` on Windows or `~/.runelite/` on Linux/MacOS.
+To use a custom image, set the Coin Type option to `Custom` in the Config Panel, and place your image named ```coin.png``` in ```%userprofile%\.runelite``` on Windows or `~/.runelite/` on Linux/macOS.
 
 If this does not work, try renaming your coin image to just `coin`.
 
@@ -24,10 +23,22 @@ You can also have your balance automatically update by specified amounts
 
 ![](readme_img/automatic_balance_updates.png)
 
-Notably:
+## Casket Rewards
+- For each tier of casket, one can choose a separate value
+- The rewards are ***only granted*** if the `Update on Clue Caskets` option is enabled (To make disabling them easy without having to change every reward value)
 
-- The casket opening rewards are ***only granted*** if the `Update on Clue Caskets` option is enabled (To make disabling them easy without setting them all to 0).
-- In the miscellaneous section you can set rewards for *new collection log slots*, however this makes no distinction based on the category it belongs to in the collection log (*soon&trade;*).
+## Miscellaneous Rewards
+- Here, you can set rewards for *new collection log slots*, however this makes no distinction based on the category it belongs to in the collection log (*soon&trade;*).
+- Also, a "reward" for dying can be set here.
+  - In this example, you are punished 5 coins for every death
+- Finally, a Reward for killing NPCs can be set. This is formatted as a comma-separated list of pairs of `<npc-name>#<kill-reward`.
+  - In the example, a reward of 1 coin is granted for killing a Goblin, and 6 for killing a Lynx Tamer
+
+## XP Rewards
+- `XP Reward`: How many coins to award
+- `XP Reward Interval`: How often to award the xp reward
+
+In the example, the player is awarded 1 coin for every 1000 xp gained.
 
 ---
 

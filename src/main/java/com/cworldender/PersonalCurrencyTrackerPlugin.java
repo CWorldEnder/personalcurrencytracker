@@ -386,7 +386,6 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			config.setXpSinceReward(config.xpSinceReward() + deltaXP);
 			// Update skill map for next iteration.
 			skillXPs.put(skill, xp);
-			log.info(deltaXP + " XP gained.");
 			// Reward if applicable
 			int xpSinceReward = config.xpSinceReward();
 			int xpRewardInterval = config.xpRewardInterval();

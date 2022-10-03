@@ -37,6 +37,7 @@ You can also have your balance automatically update by specified amounts
 ## XP Rewards
 - `XP Reward`: How many coins to award
 - `XP Reward Interval`: How often to award the xp reward
+  - If the interval is `0`, then no coins will be awarded.
 
 In the example, the player is awarded 1 coin for every 1000 xp gained.
 

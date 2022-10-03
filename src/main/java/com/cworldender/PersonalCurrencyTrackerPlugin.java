@@ -17,6 +17,7 @@ import net.runelite.api.Actor;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.ScriptID;
+import net.runelite.api.Skill;
 import net.runelite.api.VarClientStr;
 import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.NpcDespawned;
@@ -25,6 +26,8 @@ import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
+import net.runelite.api.events.StatChanged;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -46,10 +49,20 @@ import net.runelite.client.util.Text;
 )
 public class PersonalCurrencyTrackerPlugin extends Plugin
 {
+
+	// Custom Image
 	private static final File CUSTOM_COIN_IMAGE = new File(RuneLite.RUNELITE_DIR, "coin.png");
+
+	// Collection Log Reward
 	private boolean notificationStarted;
+
+	// NPC Kill Reward
 	private HashMap<String, Integer> npcRewardsMap; // Stores NPC name -> kill reward with npc name in lowercase
 	private final Set<Actor> taggedActors = new HashSet<>();
+
+	// XP Reward
+	private HashMap<Skill, Integer> skillXPs = new HashMap<>();
+	private int ticksSinceLogin = 0; // Ticks since Login/Hop. Used to ignore StatChanges on login.
 
 	@Inject
 	private Client client;
@@ -235,6 +248,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			case HOPPING:
 			case LOGGING_IN:
 				taggedActors.clear();
+				ticksSinceLogin = 0;
+				skillXPs.clear();
 		}
 	}
 	private void updateInfobox(int newCount)
@@ -308,7 +323,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	public void onCommandExecuted(CommandExecuted commandExecuted)
 	{
 		IntegerArgument arg = getIntegerFromCommandArguments(commandExecuted.getArguments());
-		switch (commandExecuted.getCommand())
+		switch (commandExecuted.getCommand().toLowerCase())
 		{
 			case "count":
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You have " + config.balance() + " " + config.currencyName(), null);
@@ -337,9 +352,48 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 					setBalance(amount);
 					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You now have " + config.balance() + " " + config.currencyName(), null);
 				}
+				break;
+			case "clearxp":
+				config.setXpSinceReward(0);
+				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "XP since last reward set to 0.", null);
+				break;
 			default:
 				break;
 		}
+	}
+
+	@Subscribe
+	public void onStatChanged(StatChanged statChanged)
+	{
+		Skill skill = statChanged.getSkill();
+		int xp = statChanged.getXp();
+		if(ticksSinceLogin > 0)
+		{	// This statChange is not due to a login/hop
+			assert skillXPs.containsKey(skill);
+			int deltaXP = xp - skillXPs.get(skill);
+			config.setXpSinceReward(config.xpSinceReward() + deltaXP);
+			// Update skill map for next iteration.
+			skillXPs.put(skill, xp);
+			log.info(deltaXP + " XP gained.");
+			// Reward if applicable
+			int xpSinceReward = config.xpSinceReward();
+			int xpRewardInterval = config.xpRewardInterval();
+			if(xpRewardInterval > 0 && xpSinceReward >= xpRewardInterval){
+				int numRewards = xpSinceReward / xpRewardInterval; // Integer-Division
+				int reward = numRewards * config.xpReward();
+				incrementBalance(numRewards * config.xpReward());
+				int newBalance = config.balance();
+				int remainingXP = xpSinceReward % xpRewardInterval;
+				config.setXpSinceReward(remainingXP);
+			}
+		} else { // Init/Update the Hashmap to calculate the delta XP's
+			skillXPs.put(statChanged.getSkill(), statChanged.getXp());
+		}
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick gameTick){
+		ticksSinceLogin++;
 	}
 
 	private IntegerArgument getIntegerFromCommandArguments(String[] args)
@@ -397,7 +451,9 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 					String[] pair = s.trim().toLowerCase().split("#");
 					if (pair.length != 2)
 					{
-						throw new IllegalArgumentException("PersonalCurrencyTracker: An (NPC, Kill-Reward) pair has more than 2 components!");
+						String msg = "PersonalCurrencyTracker: An (NPC, Kill-Reward) pair has more than 2 components!";
+						log.error(msg);
+						throw new IllegalArgumentException(msg);
 					}
 					else
 					{

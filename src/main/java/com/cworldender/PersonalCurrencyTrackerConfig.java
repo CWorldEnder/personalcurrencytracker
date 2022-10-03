@@ -194,6 +194,47 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	default String npcKillRewards(){ return ""; }
 
+	@ConfigItem(
+		keyName = "xpSinceReward",
+		name = "XP Elapsed since last Reward. Do not touch",
+		description = "",
+		hidden = true
+	)
+	default int xpSinceReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "xpSinceReward",
+		name = "XP Elapsed since last Reward. Do not touch",
+		description = "",
+		hidden = true
+	)
+	void setXpSinceReward(int xpSinceReward);
+
+	@ConfigSection(
+		name = "XP Reward",
+		description = "Config Items for XP Reward",
+		closedByDefault = true,
+		position = 3
+	)
+	String xpSection = "xpSection";
+
+	@ConfigItem(
+		keyName = "xpRewardInterval",
+		name = "XP Reward Interval",
+		description = "Reward Coins every x XP. If set to 0, no rewards will take place (But the accumulated XP will still be counted).",
+		section = xpSection
+	)
+	default int xpRewardInterval(){ return 0; }
+
+	@ConfigItem(
+		keyName = "xpReward",
+		name = "XP Reward",
+		description = "The amount of coins to reward.",
+		section = xpSection
+	)
+	default int xpReward(){ return 0; }
+
+
 // Removed until I figure out how to find out the different images for one type of item. Ideally getting an array of all different coin stacks for one type of coin, then just figure out which image to choose
 //	@ConfigItem(
 //			keyName = "thresholds",

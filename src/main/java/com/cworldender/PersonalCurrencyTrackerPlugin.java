@@ -313,6 +313,18 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				return 24711;
 			case MARK_OF_GRACE:
 				return 11849;
+			case COLLECTION_LOG:
+				return 	22711;
+			case PIECES_OF_EIGHT:
+				return 8951;
+			case GOLDEN_NUGGET:
+				return 12012;
+			case PLATINUM_TOKEN:
+				return 13204;
+			case TOKKUL:
+				return 6529;
+			case WARRIOR_GUILD_TOKEN:
+				return 8851;
 			default:
 				// Default to normal coins
 				return getItemIdForCoin(CoinType.COINS);

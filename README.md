@@ -31,8 +31,9 @@ You can also have your balance automatically update by specified amounts
 - Here, you can set rewards for *new collection log slots*, however this makes no distinction based on the category it belongs to in the collection log (*soon&trade;*).
 - Also, a "reward" for dying can be set here.
   - In this example, you are punished 5 coins for every death
-- Finally, a Reward for killing NPCs can be set. This is formatted as a comma-separated list of pairs of `<npc-name>#<kill-reward`.
+- Finally, a Reward for **killing NPCs** can be set. This is formatted as a comma-separated list of pairs of `<npc-name>#<kill-reward`.
   - In the example, a reward of 1 coin is granted for killing a Goblin, and 6 for killing a Lynx Tamer
+  - A death of an NPC is counted as a _kill_, if the NPC was tagged by the player beforehand.
 
 ## XP Rewards
 - `XP Reward`: How many coins to award

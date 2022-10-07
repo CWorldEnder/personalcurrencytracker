@@ -381,7 +381,6 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		int xp = statChanged.getXp();
 		if(ticksSinceLogin > 0)
 		{	// This statChange is not due to a login/hop
-			assert skillXPs.containsKey(skill);
 			int deltaXP = xp - skillXPs.get(skill);
 			config.setXpSinceReward(config.xpSinceReward() + deltaXP);
 			// Update skill map for next iteration.

@@ -61,7 +61,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	private final Set<Actor> taggedActors = new HashSet<>();
 
 	// XP Reward
-	private HashMap<Skill, Integer> skillXPs = new HashMap<>();
+	private int currentXP;
 	private int ticksSinceLogin = 0; // Ticks since Login/Hop. Used to ignore StatChanges on login.
 
 	@Inject
@@ -84,10 +84,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		createInfoBox();
 		updateNPCKillRewardMap(config.npcKillRewards());
 
-		// Populate skillXPs hashmap, as this is is not populated automatically if started up while logged in
-		for(Skill skill : Skill.values()){
-			skillXPs.put(skill, client.getSkillExperience(skill));
-		}
+		// Instantiate Overall XP
+		currentXP = client.getSkillExperience(Skill.OVERALL);
 	}
 
 	@Override
@@ -122,7 +120,11 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	@Subscribe
 	protected void onChatMessage(ChatMessage message)
 	{
-		// A large portion of this is very heavily inspired by the screenshot plugin
+		/*
+		* Clue Casket Opening Detection
+		* */
+
+		// A large portion of this function is very heavily inspired by the screenshot plugin
 		// https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/screenshot/ScreenshotPlugin.java
 		if (message.getType() != ChatMessageType.GAMEMESSAGE
 			&& message.getType() != ChatMessageType.SPAM
@@ -180,6 +182,10 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	@Subscribe
 	public void onScriptPreFired(ScriptPreFired scriptPreFired)
 	{
+		/*
+		* Collection Log Slot Detection
+		* */
+
 		// Adapted from Screenshot plugin
 		// https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/screenshot/ScreenshotPlugin.java
 		switch (scriptPreFired.getScriptId())
@@ -254,7 +260,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			case LOGGING_IN:
 				taggedActors.clear();
 				ticksSinceLogin = 0;
-				skillXPs.clear();
+				currentXP = client.getSkillExperience(Skill.OVERALL);
 		}
 	}
 	private void updateInfobox(int newCount)
@@ -382,14 +388,11 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged)
 	{
-		Skill skill = statChanged.getSkill();
-		int xp = statChanged.getXp();
-		if(ticksSinceLogin > 0)
+		int newXP = client.getSkillExperience(Skill.OVERALL);
+		int deltaXP = newXP - currentXP;
+		if(ticksSinceLogin > 0 && deltaXP > 0)
 		{	// This statChange is not due to a login/hop
-			int deltaXP = xp - skillXPs.get(skill);
 			config.setXpSinceReward(config.xpSinceReward() + deltaXP);
-			// Update skill map for next iteration.
-			skillXPs.put(skill, xp);
 			// Reward if applicable
 			int xpSinceReward = config.xpSinceReward();
 			int xpRewardInterval = config.xpRewardInterval();
@@ -400,7 +403,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				config.setXpSinceReward(remainingXP);
 			}
 		}
-		skillXPs.put(skill, xp); // Save the value in the hashmap
+		currentXP = newXP; // Update the current XP amount for next iteration
 	}
 
 	@Subscribe

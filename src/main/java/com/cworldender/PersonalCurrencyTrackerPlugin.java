@@ -83,6 +83,11 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		log.info("Personal Currency Tracker started!");
 		createInfoBox();
 		updateNPCKillRewardMap(config.npcKillRewards());
+
+		// Populate skillXPs hashmap, as this is is not populated automatically if started up while logged in
+		for(Skill skill : Skill.values()){
+			skillXPs.put(skill, client.getSkillExperience(skill));
+		}
 	}
 
 	@Override
@@ -390,15 +395,12 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			int xpRewardInterval = config.xpRewardInterval();
 			if(xpRewardInterval > 0 && xpSinceReward >= xpRewardInterval){
 				int numRewards = xpSinceReward / xpRewardInterval; // Integer-Division
-				int reward = numRewards * config.xpReward();
 				incrementBalance(numRewards * config.xpReward());
-				int newBalance = config.balance();
 				int remainingXP = xpSinceReward % xpRewardInterval;
 				config.setXpSinceReward(remainingXP);
 			}
-		} else { // Init/Update the Hashmap to calculate the delta XP's
-			skillXPs.put(statChanged.getSkill(), statChanged.getXp());
 		}
+		skillXPs.put(skill, xp); // Save the value in the hashmap
 	}
 
 	@Subscribe

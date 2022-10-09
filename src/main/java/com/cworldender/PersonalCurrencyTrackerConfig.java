@@ -18,7 +18,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	default String currencyName()
 	{
-		return "ChunkCoin";
+		return "Coins";
 	}
 
 	@ConfigItem(

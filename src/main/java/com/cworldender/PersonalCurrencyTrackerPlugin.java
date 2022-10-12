@@ -121,7 +121,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	protected void onChatMessage(ChatMessage message)
 	{
 		/*
-		* Clue Casket Opening Detection
+		* Clue Casket Opening Detection and Collection Log Slot Detection
 		* */
 
 		// A large portion of this function is very heavily inspired by the screenshot plugin
@@ -239,6 +239,10 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 	@Subscribe
 	public void onHitsplatApplied(HitsplatApplied hitsplatApplied){
+		/*
+		* Track tagged NPCs for NPC kill reward
+		* */
+
 		Actor actor = hitsplatApplied.getActor();
 
 		if(actor != null && hitsplatApplied.getHitsplat().isMine() && npcRewardsMap.containsKey(actor.getName().toLowerCase())){

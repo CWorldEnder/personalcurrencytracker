@@ -365,6 +365,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				break;
 			case "subtract":
 			case "remove":
+			case "spend":
 				if (arg.isValid())
 				{
 					int sub = Integer.parseInt(commandExecuted.getArguments()[0]);

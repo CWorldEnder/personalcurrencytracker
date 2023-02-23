@@ -195,6 +195,14 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	default String npcKillRewards(){ return ""; }
 
 	@ConfigItem(
+		keyName = "questCompleteReward",
+		name = "Quest Completion Reward",
+		description = "Amount of coins to reward for a quest completion.",
+		section = miscEventsSection
+	)
+	default int questCompleteReward(){ return 0; }
+
+	@ConfigItem(
 		keyName = "xpSinceReward",
 		name = "XP Elapsed since last Reward. Do not touch",
 		description = "",
@@ -234,6 +242,22 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	default int xpReward(){ return 0; }
 
+	@ConfigItem(
+		keyName = "totalLevelReward",
+		name = "Total Level Reward",
+		description = "Amount of coins to reward for a gained total level.",
+		section = xpSection
+	)
+	default int totalLeveLReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "skillLevelRewards",
+		name = "Reward for Skill Levels Gained",
+		description = "Reward for gaining a skill level. Formatted as comma-separated list of skill-name#reward pairs.",
+		section = xpSection,
+		position = 2
+	)
+	default String skillLevelRewards(){ return ""; }
 
 // Removed until I figure out how to find out the different images for one type of item. Ideally getting an array of all different coin stacks for one type of coin, then just figure out which image to choose
 //	@ConfigItem(

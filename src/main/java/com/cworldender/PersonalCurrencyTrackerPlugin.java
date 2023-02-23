@@ -28,6 +28,9 @@ import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -36,6 +39,9 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
+import static net.runelite.api.widgets.WidgetID.LEVEL_UP_GROUP_ID;
+import static net.runelite.api.widgets.WidgetID.QUEST_COMPLETED_GROUP_ID;
+
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -50,6 +56,8 @@ import net.runelite.client.util.Text;
 public class PersonalCurrencyTrackerPlugin extends Plugin
 {
 
+	boolean shouldApplyWidgetReward = false;
+
 	// Custom Image
 	private static final File CUSTOM_COIN_IMAGE = new File(RuneLite.RUNELITE_DIR, "coin.png");
 
@@ -63,7 +71,10 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	// XP Reward
 	private int currentXP;
 	private int ticksSinceLogin = 0; // Ticks since Login/Hop. Used to ignore StatChanges on login.
-
+	private static final Pattern LEVEL_UP_PATTERN = Pattern.compile(".*Your ([a-zA-Z]+) (?:level is|are)? now (\\d+)\\."); // From Screenshots plugin
+	int totalLevel; // Track this separate from using the Level Up widget so that multiple levels in one level-up are counted
+	private HashMap<String, Integer> skillRewardsMap;
+	private HashMap<Skill, Integer> skillLevels; // Use this instead of using the widgets such that also multiple-level level-ups are detected
 	@Inject
 	private Client client;
 
@@ -83,9 +94,11 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		log.info("Personal Currency Tracker started!");
 		createInfoBox();
 		updateNPCKillRewardMap(config.npcKillRewards());
+		updateSkillRewardMap(config.skillLevelRewards());
 
 		// Instantiate Overall XP
 		currentXP = client.getSkillExperience(Skill.OVERALL);
+		totalLevel = client.getTotalLevel();
 	}
 
 	@Override
@@ -104,6 +117,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		{
 			updateInfobox(config.balance());
 			updateNPCKillRewardMap(config.npcKillRewards());
+			updateSkillRewardMap(config.skillLevelRewards());
 		}
 	}
 
@@ -265,8 +279,11 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				taggedActors.clear();
 				ticksSinceLogin = 0;
 				currentXP = client.getSkillExperience(Skill.OVERALL);
+				totalLevel = client.getTotalLevel(); // 0, but will be correctly set in first statChanged event
+				skillLevels = new HashMap<>(); // Populated in the statChanged events of the first tick after login
 		}
 	}
+
 	private void updateInfobox(int newCount)
 	{
 		if (balanceBox != null) { // Destroy the infopanel
@@ -390,30 +407,73 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		}
 	}
 
+	private void rewardXPGained(){
+		int xpSinceReward = config.xpSinceReward();
+		int xpRewardInterval = config.xpRewardInterval();
+
+		if(xpRewardInterval > 0 && xpSinceReward > xpRewardInterval){
+			int numRewards = xpSinceReward / xpRewardInterval;
+			incrementBalance(numRewards * config.xpReward());
+			int unrewardedXp = xpSinceReward % xpRewardInterval;
+			config.setXpSinceReward(unrewardedXp);
+		}
+	}
+
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged)
 	{
 		int newXP = client.getSkillExperience(Skill.OVERALL);
+		int newTotalLevel = client.getTotalLevel();
 		int deltaXP = newXP - currentXP;
-		if(ticksSinceLogin > 0 && deltaXP > 0)
-		{	// This statChange is not due to a login/hop
+
+		if(ticksSinceLogin > 0 && deltaXP > 0) // This statChange is not due to a login/hop
+		{
 			config.setXpSinceReward(config.xpSinceReward() + deltaXP);
-			// Reward if applicable
-			int xpSinceReward = config.xpSinceReward();
-			int xpRewardInterval = config.xpRewardInterval();
-			if(xpRewardInterval > 0 && xpSinceReward >= xpRewardInterval){
-				int numRewards = xpSinceReward / xpRewardInterval; // Integer-Division
-				incrementBalance(numRewards * config.xpReward());
-				int remainingXP = xpSinceReward % xpRewardInterval;
-				config.setXpSinceReward(remainingXP);
+			rewardXPGained();
+
+			int levelsGained = newTotalLevel - totalLevel;
+			if(levelsGained > 0){
+				incrementBalance(levelsGained * config.totalLeveLReward());
+			}
+
+			// Specific Skill Levelup Reward
+			Skill changedSkill = statChanged.getSkill();
+			int newLevel = client.getRealSkillLevel(changedSkill);
+			int deltaLevel = newLevel - skillLevels.get(changedSkill);
+			if(deltaLevel > 0 && skillRewardsMap.containsKey(changedSkill.getName().toLowerCase())){ // At least one level was gained in this skill and we have a specified reward for this skill
+				incrementBalance(deltaLevel * skillRewardsMap.getOrDefault(changedSkill.getName().toLowerCase(), 0));
+			}
+			skillLevels.put(changedSkill, newLevel);
+		} else {
+			// Populate skillLevels Map correctly
+			for (Skill skill : Skill.values()){
+				skillLevels.put(skill, client.getRealSkillLevel(skill));
 			}
 		}
 		currentXP = newXP; // Update the current XP amount for next iteration
+		totalLevel = newTotalLevel;
 	}
 
 	@Subscribe
 	public void onGameTick(GameTick gameTick){
 		ticksSinceLogin++;
+		if(shouldApplyWidgetReward)
+		{
+			shouldApplyWidgetReward = false;
+			if (client.getWidget(WidgetInfo.QUEST_COMPLETED_NAME_TEXT) != null)
+			{
+				incrementBalance(config.questCompleteReward());
+			}
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		int groupId = event.getGroupId();
+		if(groupId == QUEST_COMPLETED_GROUP_ID){
+			shouldApplyWidgetReward = true;
+		}
 	}
 
 	private IntegerArgument getIntegerFromCommandArguments(String[] args)
@@ -462,7 +522,20 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		 * Turn this into hashmap mapping name to reward.
 		 */
 
-		HashMap<String, Integer> tempMap = new HashMap<>(); // We don't just want to write over the previous map in case items were deleted
+		npcRewardsMap = parseRewardsMapString(configStr);
+	}
+
+	private void updateSkillRewardMap(String configStr) throws  IllegalArgumentException{
+		/*
+		 * configStr is a string of comma-separated 'skill-name#kill-reward' pairs.
+		 * Turn this into hashmap mapping name to reward.
+		 */
+
+		skillRewardsMap = parseRewardsMapString(configStr);
+	}
+
+	private HashMap<String, Integer> parseRewardsMapString(String configStr) throws IllegalArgumentException{
+		HashMap<String, Integer> tempMap = new HashMap<>();
 		if(!configStr.equals("")){
 			String[] pairs = configStr.split(",");
 			for (String s : pairs)
@@ -471,7 +544,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 					String[] pair = s.trim().toLowerCase().split("#");
 					if (pair.length != 2)
 					{
-						String msg = "PersonalCurrencyTracker: An (NPC, Kill-Reward) pair has more than 2 components!";
+						String msg = "PersonalCurrencyTracker: A config pair has more than 2 components!";
 						log.error(msg);
 						throw new IllegalArgumentException(msg);
 					}
@@ -482,7 +555,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				}
 			}
 		}
-		npcRewardsMap = tempMap;
+		return tempMap;
 	}
 
 	@Provides

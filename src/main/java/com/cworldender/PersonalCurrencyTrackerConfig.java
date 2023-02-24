@@ -199,7 +199,8 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		keyName = "questCompleteReward",
 		name = "Quest Completion Reward",
 		description = "Amount of coins to reward for a quest completion.",
-		section = miscEventsSection
+		section = miscEventsSection,
+		position = 3
 	)
 	default int questCompleteReward(){ return 0; }
 
@@ -207,9 +208,19 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		keyName = "timeReward",
 		name = "Time-Based Reward",
 		description = "Amount of coins to reward per minute.",
-		section = miscEventsSection
+		section = miscEventsSection,
+		position = 4
 	)
 	default int timeReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "timeRewardInterval",
+		name = "Time Reward Interval (Seconds)",
+		description = "Interval in which to apply the time-based reward (Seconds).",
+		section = miscEventsSection,
+		position = 5
+	)
+	default int timeRewardInterval(){ return 0; }
 
 	@ConfigItem(
 		keyName = "timeSinceLastTimeReward",
@@ -226,14 +237,6 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		hidden = true
 	)
 	void setDurationSinceLastTimeReward(Duration dur);
-
-	@ConfigItem(
-		keyName = "timeRewardInterval",
-		name = "Time Reward Interval (Seconds)",
-		description = "Interval in which to apply the time-based reward (Seconds).",
-		section = miscEventsSection
-	)
-	default int timeRewardInterval(){ return 0; }
 
 	@ConfigItem(
 		keyName = "xpSinceReward",
@@ -291,12 +294,4 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		position = 2
 	)
 	default String skillLevelRewards(){ return ""; }
-
-// Removed until I figure out how to find out the different images for one type of item. Ideally getting an array of all different coin stacks for one type of coin, then just figure out which image to choose
-//	@ConfigItem(
-//			keyName = "thresholds",
-//			name = "Coin Stack Change Thresholds",
-//			description = "Thresholds for changing the coin stack image as comma-seperated list of integers (Not applicable if Custom Image is selected)"
-//	)
-//	default String thresholds(){ return "1,2,3,4,5,10,15,30,100";}
 }

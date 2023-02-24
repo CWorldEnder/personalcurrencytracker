@@ -1,5 +1,6 @@
 package com.cworldender;
 
+import java.time.Duration;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -201,6 +202,38 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		section = miscEventsSection
 	)
 	default int questCompleteReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "timeReward",
+		name = "Time-Based Reward",
+		description = "Amount of coins to reward per minute.",
+		section = miscEventsSection
+	)
+	default int timeReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "timeSinceLastTimeReward",
+		name = "Time Since Last Time Reward",
+		description = "Accumulated login time since the last time reward.",
+		hidden = true
+	)
+	default Duration durationSinceLastTimeReward(){ return Duration.ZERO; }
+
+	@ConfigItem(
+		keyName = "timeSinceLastTimeReward",
+		name = "Time Since Last Time Reward",
+		description = "Accumulated login time since the last time reward.",
+		hidden = true
+	)
+	void setDurationSinceLastTimeReward(Duration dur);
+
+	@ConfigItem(
+		keyName = "timeRewardInterval",
+		name = "Time Reward Interval (Seconds)",
+		description = "Interval in which to apply the time-based reward (Seconds).",
+		section = miscEventsSection
+	)
+	default int timeRewardInterval(){ return 0; }
 
 	@ConfigItem(
 		keyName = "xpSinceReward",

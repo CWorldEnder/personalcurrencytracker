@@ -2,6 +2,8 @@ package com.cworldender;
 
 import com.google.inject.Provides;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -30,7 +32,6 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.api.widgets.Widget;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -39,7 +40,6 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
-import static net.runelite.api.widgets.WidgetID.LEVEL_UP_GROUP_ID;
 import static net.runelite.api.widgets.WidgetID.QUEST_COMPLETED_GROUP_ID;
 
 
@@ -68,13 +68,17 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	private HashMap<String, Integer> npcRewardsMap; // Stores NPC name -> kill reward with npc name in lowercase
 	private final Set<Actor> taggedActors = new HashSet<>();
 
-	// XP Reward
+	// XP Rewards
 	private int currentXP;
 	private int ticksSinceLogin = 0; // Ticks since Login/Hop. Used to ignore StatChanges on login.
 	private static final Pattern LEVEL_UP_PATTERN = Pattern.compile(".*Your ([a-zA-Z]+) (?:level is|are)? now (\\d+)\\."); // From Screenshots plugin
 	int totalLevel; // Track this separate from using the Level Up widget so that multiple levels in one level-up are counted
 	private HashMap<String, Integer> skillRewardsMap;
 	private HashMap<Skill, Integer> skillLevels; // Use this instead of using the widgets such that also multiple-level level-ups are detected
+
+	// Time-Based Reward
+	Instant lastTimeUpdate;
+
 	@Inject
 	private Client client;
 
@@ -99,6 +103,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		// Instantiate Overall XP
 		currentXP = client.getSkillExperience(Skill.OVERALL);
 		totalLevel = client.getTotalLevel();
+
+		lastTimeUpdate = Instant.now();
 	}
 
 	@Override
@@ -281,6 +287,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				currentXP = client.getSkillExperience(Skill.OVERALL);
 				totalLevel = client.getTotalLevel(); // 0, but will be correctly set in first statChanged event
 				skillLevels = new HashMap<>(); // Populated in the statChanged events of the first tick after login
+				lastTimeUpdate = Instant.now();
 		}
 	}
 
@@ -456,6 +463,10 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 	@Subscribe
 	public void onGameTick(GameTick gameTick){
+		if(ticksSinceLogin == 0){
+			lastTimeUpdate = Instant.now();
+		}
+
 		ticksSinceLogin++;
 		if(shouldApplyWidgetReward)
 		{
@@ -464,6 +475,29 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			{
 				incrementBalance(config.questCompleteReward());
 			}
+		}
+
+		if(config.timeReward() > 0 && ticksSinceLogin % 5 == 0){ // Update every 5 ticks which is approx (assuming server runs perfectly) every 3 seconds
+			Instant now = Instant.now();
+			Duration dur = Duration.between(lastTimeUpdate, now);
+			lastTimeUpdate = now;
+
+			config.setDurationSinceLastTimeReward(dur.plus(config.durationSinceLastTimeReward()));
+
+			// Apply reward if applicable
+			int secondsToReward = (int) config.durationSinceLastTimeReward().getSeconds() / config.timeRewardInterval();
+			config.setDurationSinceLastTimeReward(
+				config.durationSinceLastTimeReward().minus(Duration.ofSeconds((long) secondsToReward * config.timeRewardInterval()))
+			);
+
+			if (secondsToReward > 0) {
+				incrementBalance(
+					config.timeReward() * secondsToReward
+				);
+			}
+		} else if(config.timeReward() <= 0){ // ticksSinceLogin is a multiple of 5, but there is no time reward set
+			// --> still update lastTimeUpdate
+			lastTimeUpdate = Instant.now();
 		}
 	}
 

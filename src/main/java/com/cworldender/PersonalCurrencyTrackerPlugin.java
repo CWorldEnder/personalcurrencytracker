@@ -260,8 +260,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	@Subscribe
 	public void onHitsplatApplied(HitsplatApplied hitsplatApplied){
 		/*
-		* Track tagged NPCs for NPC kill reward
-		* */
+		 * Track tagged NPCs for NPC kill reward
+		*/
 
 		Actor actor = hitsplatApplied.getActor();
 
@@ -288,6 +288,9 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				totalLevel = client.getTotalLevel(); // 0, but will be correctly set in first statChanged event
 				skillLevels = new HashMap<>(); // Populated in the statChanged events of the first tick after login
 				lastTimeUpdate = Instant.now();
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -426,33 +429,37 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		}
 	}
 
+	private void rewardTotalLevelsGained(int levelsGained){
+		if(levelsGained > 0){
+			incrementBalance(levelsGained * config.totalLeveLReward());
+		}
+	}
+
+	private void rewardSkillLevelGained(Skill skill){
+		int newLevel = client.getRealSkillLevel(skill);
+		int deltaLevel = newLevel - skillLevels.get(skill);
+		if (deltaLevel > 0 && skillRewardsMap.containsKey(skill.getName().toLowerCase())) { // At least one level was gained in this skill and we have a specified reward for this skill
+			incrementBalance(deltaLevel * skillRewardsMap.getOrDefault(skill.getName().toLowerCase(), 0));
+		}
+		skillLevels.put(skill, newLevel);
+	}
+
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged)
 	{
 		int newXP = client.getSkillExperience(Skill.OVERALL);
-		int newTotalLevel = client.getTotalLevel();
 		int deltaXP = newXP - currentXP;
+		int newTotalLevel = client.getTotalLevel();
 
-		if(ticksSinceLogin > 0 && deltaXP > 0) // This statChange is not due to a login/hop
+		if(ticksSinceLogin > 0 && deltaXP > 0) // This statChange is not due to a login/hop and actual xp was gained
 		{
 			config.setXpSinceReward(config.xpSinceReward() + deltaXP);
 			rewardXPGained();
 
-			int levelsGained = newTotalLevel - totalLevel;
-			if(levelsGained > 0){
-				incrementBalance(levelsGained * config.totalLeveLReward());
-			}
+			rewardTotalLevelsGained(newTotalLevel - totalLevel);
 
-			// Specific Skill Levelup Reward
-			Skill changedSkill = statChanged.getSkill();
-			int newLevel = client.getRealSkillLevel(changedSkill);
-			int deltaLevel = newLevel - skillLevels.get(changedSkill);
-			if(deltaLevel > 0 && skillRewardsMap.containsKey(changedSkill.getName().toLowerCase())){ // At least one level was gained in this skill and we have a specified reward for this skill
-				incrementBalance(deltaLevel * skillRewardsMap.getOrDefault(changedSkill.getName().toLowerCase(), 0));
-			}
-			skillLevels.put(changedSkill, newLevel);
-		} else {
-			// Populate skillLevels Map correctly
+			rewardSkillLevelGained(statChanged.getSkill());
+		} else if(ticksSinceLogin <= 0){ // Populate skillLevels Map correctly
 			for (Skill skill : Skill.values()){
 				skillLevels.put(skill, client.getRealSkillLevel(skill));
 			}
@@ -461,22 +468,16 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		totalLevel = newTotalLevel;
 	}
 
-	@Subscribe
-	public void onGameTick(GameTick gameTick){
-		if(ticksSinceLogin == 0){
-			lastTimeUpdate = Instant.now();
-		}
 
-		ticksSinceLogin++;
-		if(shouldApplyWidgetReward)
+	private void applyWidgetReward(){
+		shouldApplyWidgetReward = false;
+		if (client.getWidget(WidgetInfo.QUEST_COMPLETED_NAME_TEXT) != null)
 		{
-			shouldApplyWidgetReward = false;
-			if (client.getWidget(WidgetInfo.QUEST_COMPLETED_NAME_TEXT) != null)
-			{
-				incrementBalance(config.questCompleteReward());
-			}
+			incrementBalance(config.questCompleteReward());
 		}
+	}
 
+	private void applyTimeReward(){
 		if(config.timeReward() > 0 && ticksSinceLogin % 5 == 0){ // Update every 5 ticks which is approx (assuming server runs perfectly) every 3 seconds
 			Instant now = Instant.now();
 			Duration dur = Duration.between(lastTimeUpdate, now);
@@ -499,6 +500,21 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			// --> still update lastTimeUpdate
 			lastTimeUpdate = Instant.now();
 		}
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick gameTick){
+		if(ticksSinceLogin == 0){
+			lastTimeUpdate = Instant.now();
+		}
+
+		ticksSinceLogin++;
+		if(shouldApplyWidgetReward)
+		{
+			applyWidgetReward();
+		}
+
+		applyTimeReward();
 	}
 
 	@Subscribe

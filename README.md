@@ -1,4 +1,4 @@
-# Personal Currency Tracker [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/personalcurrencytracker)](https://runelite.net/plugin-hub) [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/personalcurrencytracker)](https://runelite.net/plugin-hub) #
+# Personal Currency Tracker
 
 # Changing the amount #
 There are 2 ways to change the amount

@@ -244,7 +244,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "collLogReward",
-		name = "Collection Log Reward",
+		name = "Collection Log",
 		description = "Reward for any new collection log slot filled.",
 		section = miscEventsSection,
 		position = 0
@@ -267,7 +267,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = NPC_KILL_REWARD_KEY,
-		name = "NPC Kill",
+		name = "NPC Kills",
 		description = "Reward for killing an NPC. Formatted as comma-separated list of npc-name#reward pairs.",
 		section = miscEventsSection,
 		position = 2

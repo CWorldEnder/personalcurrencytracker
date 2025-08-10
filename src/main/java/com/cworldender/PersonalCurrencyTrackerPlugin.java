@@ -337,41 +337,9 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 		}
 
-		return itemManager.getImage(getItemIdForCoin(config.cointype()), config.balance() * 100, false);
+		return itemManager.getImage(config.cointype().getItemId(), config.balance() * 100, false);
 	}
 
-	private int getItemIdForCoin(CoinType coin)
-	{
-	// TODO: Extract this into another class?
-		switch (coin)
-		{
-			case COINS:
-				return 995;
-			case BLOOD_MONEY:
-				return 13307;
-			case PURPLE_SWEETS:
-				return 10476;
-			case HALLOWED_MARK:
-				return 24711;
-			case MARK_OF_GRACE:
-				return 11849;
-			case COLLECTION_LOG:
-				return 	22711;
-			case PIECES_OF_EIGHT:
-				return 8951;
-			case GOLDEN_NUGGET:
-				return 12012;
-			case PLATINUM_TOKEN:
-				return 13204;
-			case TOKKUL:
-				return 6529;
-			case WARRIOR_GUILD_TOKEN:
-				return 8851;
-			default:
-				// Default to normal coins
-				return getItemIdForCoin(CoinType.COINS);
-		}
-	}
 
 	@Subscribe
 	public void onCommandExecuted(CommandExecuted commandExecuted)

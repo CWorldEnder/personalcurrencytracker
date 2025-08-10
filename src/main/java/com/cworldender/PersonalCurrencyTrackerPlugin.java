@@ -99,11 +99,16 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		updateNPCKillRewardMap(config.npcKillRewards());
 		updateSkillRewardMap(config.skillLevelRewards());
 
-		// Instantiate Overall XP
-		currentXP = client.getOverallExperience();
-		totalLevel = client.getTotalLevel();
-
-		lastTimeUpdate = Instant.now();
+		// Instantiate Xp, time, ...
+		switch (client.getGameState()) {
+			case LOGGED_IN:
+			case LOGGING_IN:
+			case HOPPING:
+				handleLogin(true);
+				break;
+			default:
+				break;
+		}
 	}
 
 	@Override
@@ -130,6 +135,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				case PersonalCurrencyTrackerConfig.SKILL_LEVEL_REWARD_KEY:
 					updateSkillRewardMap(config.skillLevelRewards());
 					break;
+				default:
+					break;
 			}
 		}
 	}
@@ -153,6 +160,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 		// A large portion of this function is very heavily inspired by the screenshot plugin
 		// https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/screenshot/ScreenshotPlugin.java
+		// TODO: Why am I not excluding everything that isn't a game message?
 		if (message.getType() != ChatMessageType.GAMEMESSAGE
 			&& message.getType() != ChatMessageType.SPAM
 			&& message.getType() != ChatMessageType.TRADE
@@ -238,6 +246,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 				// }
 				notificationStarted = false;
 				break;
+			default:
+				break;
 		}
 	}
 
@@ -288,17 +298,26 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	{
 		switch(gameStateChanged.getGameState()){
 			case HOPPING:
+				handleLogin(false);
 			case LOGGING_IN:
-				taggedActors.clear();
-				ticksSinceLogin = 0;
-				currentXP = client.getOverallExperience();
-				totalLevel = client.getTotalLevel(); // 0, but will be correctly set in first statChanged event
-				skillLevels = new HashMap<>(); // Populated in the statChanged events of the first tick after login
-				lastTimeUpdate = Instant.now();
+				handleLogin(true);
 				break;
 			default:
 				break;
 		}
+	}
+
+	private void handleLogin(boolean resetLastTimeUpdate) {
+		taggedActors.clear();
+		ticksSinceLogin = 0;
+		currentXP = client.getOverallExperience();
+		totalLevel = client.getTotalLevel(); // 0, but will be correctly set in first statChanged event
+		skillLevels = new HashMap<>();
+		updateSkillLevelsMap();
+		if (resetLastTimeUpdate) {
+			lastTimeUpdate = Instant.now();
+		}
+
 	}
 
 	private void updateInfobox()
@@ -436,11 +455,6 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			rewardTotalLevelsGained(newTotalLevel - totalLevel);
 
 			rewardSkillLevelGained(statChanged.getSkill());
-		} else if(ticksSinceLogin <= 0 && skillLevels.isEmpty()){
-			// Populate skillLevels Map
-			for (Skill skill : Skill.values()){
-				skillLevels.put(skill, client.getRealSkillLevel(skill));
-			}
 		}
 
 		// Update the current amounts for next iteration
@@ -548,6 +562,12 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		 */
 
 		skillRewardsMap = parseRewardsMapString(configStr);
+	}
+
+	private void updateSkillLevelsMap() {
+		for (Skill skill : Skill.values()){
+			skillLevels.put(skill, client.getRealSkillLevel(skill));
+		}
 	}
 
 	private HashMap<String, Integer> parseRewardsMapString(String configStr) throws IllegalArgumentException{

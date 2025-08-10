@@ -86,6 +86,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return false;
 	}
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "beginnerReward",
 		name = "Beginner Casket",
@@ -98,6 +99,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return 0;
 	}
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "easyReward",
 		name = "Easy Casket",
@@ -110,6 +112,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return 0;
 	}
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "mediumReward",
 		name = "Medium Casket",
@@ -122,6 +125,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return 0;
 	}
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "hardReward",
 		name = "Hard Casket",
@@ -134,6 +138,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return 0;
 	}
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "eliteReward",
 		name = "Elite Casket",
@@ -146,6 +151,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return 0;
 	}
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "masterReward",
 		name = "Master Casket",
@@ -186,6 +192,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	void setXpSinceReward(long xpSinceReward);
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "totalLevelReward",
 		name = "Total Level",
@@ -195,6 +202,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	default int totalLeveLReward(){ return 0; }
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "xpReward",
 		name = "XP Reward",
@@ -233,6 +241,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	String miscEventsSection = "miscEventsSection";
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "collLogReward",
 		name = "Collection Log Reward",
@@ -244,9 +253,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return 0;
 	}
 
-	@Range(
-		min = Integer.MIN_VALUE
-	)
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "deathReward",
 		name = "Death",
@@ -267,6 +274,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	default String npcKillRewards(){ return ""; }
 
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "questCompleteReward",
 		name = "Quest Completion",
@@ -276,9 +284,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	default int questCompleteReward(){ return 0; }
 
-	@Range(
-		min = Integer.MIN_VALUE
-	)
+	@Range(min = Integer.MIN_VALUE)
 	@ConfigItem(
 		keyName = "timeReward",
 		name = "Playtime",

@@ -60,11 +60,14 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	}
 
 
+	/*
+	 * Clue Rewards Section
+	 */
 	@ConfigSection(
 		name = "Casket Rewards",
 		description = "Set your coins to be automatically updated when you open caskets.",
 		closedByDefault = true,
-		position = 1
+		position = 0
 	)
 	String casketsSection = "casketsSection";
 
@@ -82,7 +85,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "beginnerReward",
-		name = "Beginner Reward",
+		name = "Beginner Casket",
 		description = "Reward for opening a Beginner Casket",
 		section = casketsSection,
 		position = 0
@@ -94,7 +97,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "easyReward",
-		name = "Easy Reward",
+		name = "Easy Casket",
 		description = "Reward for opening a Easy Casket",
 		section = casketsSection,
 		position = 1
@@ -106,7 +109,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "mediumReward",
-		name = "Medium Reward",
+		name = "Medium Casket",
 		description = "Reward for opening a Medium Casket",
 		section = casketsSection,
 		position = 2
@@ -118,7 +121,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "hardReward",
-		name = "Hard Reward",
+		name = "Hard Casket",
 		description = "Reward for opening a Hard Casket",
 		section = casketsSection,
 		position = 3
@@ -130,7 +133,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "eliteReward",
-		name = "Elite Reward",
+		name = "Elite Casket",
 		description = "Reward for opening a Elite Casket",
 		section = casketsSection,
 		position = 4
@@ -142,7 +145,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "masterReward",
-		name = "Master Reward",
+		name = "Master Casket",
 		description = "Reward for opening a Master Casket",
 		section = casketsSection,
 		position = 5
@@ -152,6 +155,73 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		return 0;
 	}
 
+
+	/*
+	 * XP Rewards Section
+	 */
+	@ConfigSection(
+		name = "XP Rewards",
+		description = "Config Items for XP Reward",
+		closedByDefault = true,
+		position = 1
+	)
+	String xpSection = "xpSection";
+
+	@ConfigItem(
+		keyName = "xpSinceReward",
+		name = "XP Elapsed since last Reward. Do not touch",
+		description = "",
+		hidden = true
+	)
+	default int xpSinceReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "xpSinceReward",
+		name = "XP Elapsed since last Reward. Do not touch",
+		description = "",
+		hidden = true
+	)
+	void setXpSinceReward(long xpSinceReward);
+
+	@ConfigItem(
+		keyName = "totalLevelReward",
+		name = "Total Level",
+		description = "Amount of coins to reward for a gained total level.",
+		section = xpSection,
+		position = 0
+	)
+	default int totalLeveLReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "xpReward",
+		name = "XP Reward",
+		description = "The amount of coins to reward.",
+		section = xpSection,
+		position = 1
+	)
+	default int xpReward(){ return 0; }
+
+	@ConfigItem(
+		keyName = "xpRewardInterval",
+		name = "XP Reward Interval",
+		description = "Reward Coins every x XP. If set to 0, no rewards will take place (But the accumulated XP will still be counted).",
+		section = xpSection,
+		position = 2
+	)
+	default int xpRewardInterval(){ return 0; }
+
+	@ConfigItem(
+		keyName = "skillLevelRewards",
+		name = "Reward for Skill Levels Gained",
+		description = "Reward for gaining a skill level. Formatted as comma-separated list of skill-name#reward pairs.",
+		section = xpSection,
+		position = 3
+	)
+	default String skillLevelRewards(){ return ""; }
+
+	/*
+	 * Miscellaneous Rewards Section
+	 */
 	@ConfigSection(
 		name = "Miscellaneous Rewards",
 		description = "Set your coins to be automatically updated misc. events.",
@@ -172,12 +242,11 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	}
 
 	@Range(
-		min = Integer.MIN_VALUE,
-		max = Integer.MAX_VALUE
+		min = Integer.MIN_VALUE
 	)
 	@ConfigItem(
 		keyName = "deathReward",
-		name = "Reward for Player Death",
+		name = "Death",
 		description = "Reward for dying (typically negative)",
 		section = miscEventsSection,
 		position = 1
@@ -188,7 +257,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "npcKillRewards",
-		name = "Reward for NPC Kills",
+		name = "NPC Kill",
 		description = "Reward for killing an NPC. Formatted as comma-separated list of npc-name#reward pairs.",
 		section = miscEventsSection,
 		position = 2
@@ -197,7 +266,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "questCompleteReward",
-		name = "Quest Completion Reward",
+		name = "Quest Completion",
 		description = "Amount of coins to reward for a quest completion.",
 		section = miscEventsSection,
 		position = 3
@@ -206,7 +275,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "timeReward",
-		name = "Time-Based Reward",
+		name = "Playtime",
 		description = "Amount of coins to reward per minute.",
 		section = miscEventsSection,
 		position = 4
@@ -215,7 +284,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 
 	@ConfigItem(
 		keyName = "timeRewardInterval",
-		name = "Time Reward Interval (Seconds)",
+		name = "Playtime Interval (Seconds)",
 		description = "Interval in which to apply the time-based reward (Seconds).",
 		section = miscEventsSection,
 		position = 5
@@ -237,61 +306,4 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		hidden = true
 	)
 	void setDurationSinceLastTimeReward(Duration dur);
-
-	@ConfigItem(
-		keyName = "xpSinceReward",
-		name = "XP Elapsed since last Reward. Do not touch",
-		description = "",
-		hidden = true
-	)
-	default int xpSinceReward(){ return 0; }
-
-	@ConfigItem(
-		keyName = "xpSinceReward",
-		name = "XP Elapsed since last Reward. Do not touch",
-		description = "",
-		hidden = true
-	)
-	void setXpSinceReward(long xpSinceReward);
-
-	@ConfigSection(
-		name = "XP Reward",
-		description = "Config Items for XP Reward",
-		closedByDefault = true,
-		position = 3
-	)
-	String xpSection = "xpSection";
-
-	@ConfigItem(
-		keyName = "xpRewardInterval",
-		name = "XP Reward Interval",
-		description = "Reward Coins every x XP. If set to 0, no rewards will take place (But the accumulated XP will still be counted).",
-		section = xpSection
-	)
-	default int xpRewardInterval(){ return 0; }
-
-	@ConfigItem(
-		keyName = "xpReward",
-		name = "XP Reward",
-		description = "The amount of coins to reward.",
-		section = xpSection
-	)
-	default int xpReward(){ return 0; }
-
-	@ConfigItem(
-		keyName = "totalLevelReward",
-		name = "Total Level Reward",
-		description = "Amount of coins to reward for a gained total level.",
-		section = xpSection
-	)
-	default int totalLeveLReward(){ return 0; }
-
-	@ConfigItem(
-		keyName = "skillLevelRewards",
-		name = "Reward for Skill Levels Gained",
-		description = "Reward for gaining a skill level. Formatted as comma-separated list of skill-name#reward pairs.",
-		section = xpSection,
-		position = 2
-	)
-	default String skillLevelRewards(){ return ""; }
 }

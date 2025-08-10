@@ -427,7 +427,8 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		long deltaXP = newXP - currentXP;
 		int newTotalLevel = client.getTotalLevel();
 
-		if(ticksSinceLogin > 0 && deltaXP > 0) // This statChange is not due to a login/hop and actual xp was gained
+		// This statChange is not due to a login/hop and actual xp was gained
+		if(ticksSinceLogin > 0 && deltaXP > 0)
 		{
 			config.setXpSinceReward(config.xpSinceReward() + deltaXP);
 			rewardXPGained();
@@ -435,12 +436,15 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			rewardTotalLevelsGained(newTotalLevel - totalLevel);
 
 			rewardSkillLevelGained(statChanged.getSkill());
-		} else if(ticksSinceLogin <= 0){ // Populate skillLevels Map correctly
+		} else if(ticksSinceLogin <= 0 && skillLevels.isEmpty()){
+			// Populate skillLevels Map
 			for (Skill skill : Skill.values()){
 				skillLevels.put(skill, client.getRealSkillLevel(skill));
 			}
 		}
-		currentXP = newXP; // Update the current XP amount for next iteration
+
+		// Update the current amounts for next iteration
+		currentXP = newXP;
 		totalLevel = newTotalLevel;
 	}
 

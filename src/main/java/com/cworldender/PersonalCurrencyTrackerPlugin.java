@@ -430,6 +430,10 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		}
 	}
 
+	/**
+	 * Check if the skill level increased and apply rewards if applicable.
+	 * Then, update the tracked current skill level
+	 */
 	private void rewardSkillLevelGained(Skill skill){
 		int newLevel = client.getRealSkillLevel(skill);
 		int deltaLevel = newLevel - skillLevels.get(skill);
@@ -454,6 +458,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 			rewardTotalLevelsGained(newTotalLevel - totalLevel);
 
+			// TODO: I don't like that this is the only function that updates the tracked xp on its own
 			rewardSkillLevelGained(statChanged.getSkill());
 		}
 

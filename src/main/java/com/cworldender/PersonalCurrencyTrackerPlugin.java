@@ -471,7 +471,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	}
 
 	private void applyTimeReward(){
-		if(config.timeReward() > 0 && ticksSinceLogin % 5 == 0){ // Update every 5 ticks which is approx (assuming server runs perfectly) every 3 seconds
+		if(config.timeReward() != 0 && ticksSinceLogin % 5 == 0){ // Update every 5 ticks which is approx (assuming server runs perfectly) every 3 seconds
 			Instant now = Instant.now();
 			Duration dur = Duration.between(lastTimeUpdate, now);
 			lastTimeUpdate = now;
@@ -489,7 +489,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 					config.timeReward() * secondsToReward
 				);
 			}
-		} else if(config.timeReward() <= 0){ // ticksSinceLogin is a multiple of 5, but there is no time reward set
+		} else if(config.timeReward() == 0){ // ticksSinceLogin is a multiple of 5, but there is no time reward set
 			// --> still update lastTimeUpdate
 			lastTimeUpdate = Instant.now();
 		}

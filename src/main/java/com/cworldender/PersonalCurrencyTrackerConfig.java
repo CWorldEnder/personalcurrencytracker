@@ -276,6 +276,9 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	)
 	default int questCompleteReward(){ return 0; }
 
+	@Range(
+		min = Integer.MIN_VALUE
+	)
 	@ConfigItem(
 		keyName = "timeReward",
 		name = "Playtime",

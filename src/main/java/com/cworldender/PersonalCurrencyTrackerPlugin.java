@@ -120,9 +120,17 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 	{
 		if (configChanged.getGroup().equals(PersonalCurrencyTrackerConfig.GROUP))
 		{
-			updateInfobox();
-			updateNPCKillRewardMap(config.npcKillRewards());
-			updateSkillRewardMap(config.skillLevelRewards());
+			switch(configChanged.getKey()) {
+				case PersonalCurrencyTrackerConfig.BALANCE_KEY:
+					updateInfobox();
+					break;
+				case PersonalCurrencyTrackerConfig.NPC_KILL_REWARD_KEY:
+					updateNPCKillRewardMap(config.npcKillRewards());
+					break;
+				case PersonalCurrencyTrackerConfig.SKILL_LEVEL_REWARD_KEY:
+					updateSkillRewardMap(config.skillLevelRewards());
+					break;
+			}
 		}
 	}
 

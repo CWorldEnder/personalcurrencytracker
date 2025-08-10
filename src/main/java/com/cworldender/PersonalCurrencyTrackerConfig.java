@@ -11,6 +11,9 @@ import net.runelite.client.config.Range;
 public interface PersonalCurrencyTrackerConfig extends Config
 {
 	String GROUP = "personalcurrencytracker";
+	String BALANCE_KEY = "balance";
+	String NPC_KILL_REWARD_KEY = "npcKillRewards";
+	String SKILL_LEVEL_REWARD_KEY = "skillLevelRewards";
 
 	@ConfigItem(
 		keyName = "currencyName",
@@ -23,7 +26,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "balance",
+		keyName = BALANCE_KEY,
 		name = "Balance",
 		description = "How much money do you have?"
 	)
@@ -211,7 +214,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	default int xpRewardInterval(){ return 0; }
 
 	@ConfigItem(
-		keyName = "skillLevelRewards",
+		keyName = SKILL_LEVEL_REWARD_KEY,
 		name = "Reward for Skill Levels Gained",
 		description = "Reward for gaining a skill level. Formatted as comma-separated list of skill-name#reward pairs.",
 		section = xpSection,
@@ -256,7 +259,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "npcKillRewards",
+		keyName = NPC_KILL_REWARD_KEY,
 		name = "NPC Kill",
 		description = "Reward for killing an NPC. Formatted as comma-separated list of npc-name#reward pairs.",
 		section = miscEventsSection,

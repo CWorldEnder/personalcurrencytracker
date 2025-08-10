@@ -244,7 +244,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		description = "",
 		hidden = true
 	)
-	default int xpSinceReward(){ return 0; }
+	default long xpSinceReward(){ return 0; }
 
 	@ConfigItem(
 		keyName = "xpSinceReward",
@@ -252,7 +252,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		description = "",
 		hidden = true
 	)
-	void setXpSinceReward(int xpSinceReward);
+	void setXpSinceReward(long xpSinceReward);
 
 	@ConfigSection(
 		name = "XP Reward",
@@ -268,7 +268,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		description = "Reward Coins every x XP. If set to 0, no rewards will take place (But the accumulated XP will still be counted).",
 		section = xpSection
 	)
-	default int xpRewardInterval(){ return 0; }
+	default long xpRewardInterval(){ return 0; }
 
 	@ConfigItem(
 		keyName = "xpReward",

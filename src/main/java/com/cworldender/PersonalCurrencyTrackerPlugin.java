@@ -387,7 +387,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 
 	private void rewardXPGained(){
 		long xpSinceReward = config.xpSinceReward();
-		long xpRewardInterval = config.xpRewardInterval();
+		int xpRewardInterval = config.xpRewardInterval();
 
 		if(xpRewardInterval > 0 && xpSinceReward > xpRewardInterval){
 			// TODO: more elegant way to make this cast?

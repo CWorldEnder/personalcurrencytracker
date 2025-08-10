@@ -244,7 +244,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		description = "",
 		hidden = true
 	)
-	default long xpSinceReward(){ return 0; }
+	default int xpSinceReward(){ return 0; }
 
 	@ConfigItem(
 		keyName = "xpSinceReward",

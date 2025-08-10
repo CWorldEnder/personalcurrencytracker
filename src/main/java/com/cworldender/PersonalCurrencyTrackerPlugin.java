@@ -163,7 +163,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		{
 			Pattern NUMBER_PATTERN = Pattern.compile("([0-9]+)");
 			Matcher m = NUMBER_PATTERN.matcher(Text.removeTags(msg));
-			if (m.find()){
+			if (m.find()) {
 				String clueType = msg.substring(msg.lastIndexOf(m.group()) + m.group().length() + 1, msg.indexOf("Treasure") - 1);
 
 				// Honestly, there has got to be a better way
@@ -189,12 +189,11 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 					default:
 						break;
 				}
-			} else if (msg.startsWith("New item added to your collection log:") && config.collLogReward() != 0)
-			{
-				// String[] itemname = msg.split("New item added to your collection log: ")[1];
-				// New Collection log slot --> Update balance
-				incrementBalance(config.collLogReward());
 			}
+		} else if (config.collLogReward() != 0 && msg.startsWith("New item added to your collection log:")) {
+			// String[] itemname = msg.split("New item added to your collection log: ")[1];
+			// New Collection log slot --> Update balance
+			incrementBalance(config.collLogReward());
 		}
 	}
 

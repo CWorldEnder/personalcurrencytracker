@@ -268,7 +268,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 		description = "Reward Coins every x XP. If set to 0, no rewards will take place (But the accumulated XP will still be counted).",
 		section = xpSection
 	)
-	default long xpRewardInterval(){ return 0; }
+	default int xpRewardInterval(){ return 0; }
 
 	@ConfigItem(
 		keyName = "xpReward",

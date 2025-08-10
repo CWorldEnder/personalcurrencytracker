@@ -29,6 +29,7 @@ You can also have your balance automatically update by specified amounts
 
 ## Miscellaneous Rewards
 - Here, you can set rewards for *new collection log slots*, however this makes no distinction based on the category it belongs to in the collection log (*soon&trade;*).
+  - Currently, if both the chat notification and collection log popup are enabled, the reward is triggered twice!
 - Also, a "reward" for dying can be set here.
   - In this example, you are punished 5 coins for every death
 - Finally, a Reward for **killing NPCs** can be set. This is formatted as a comma-separated list of pairs of `<npc-name>#<kill-reward`.

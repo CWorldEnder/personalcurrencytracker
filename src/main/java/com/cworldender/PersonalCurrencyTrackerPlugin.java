@@ -389,7 +389,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 		long xpSinceReward = config.xpSinceReward();
 		int xpRewardInterval = config.xpRewardInterval();
 
-		if(xpRewardInterval > 0 && xpSinceReward > xpRewardInterval){
+		if(xpRewardInterval > 0 && xpSinceReward >= xpRewardInterval){
 			// TODO: more elegant way to make this cast?
 			int numRewards = (int) (xpSinceReward / xpRewardInterval);
 			incrementBalance(numRewards *  config.xpReward());

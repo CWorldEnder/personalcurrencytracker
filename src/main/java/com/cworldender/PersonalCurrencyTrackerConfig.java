@@ -14,6 +14,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	String BALANCE_KEY = "balance";
 	String NPC_KILL_REWARD_KEY = "npcKillRewards";
 	String SKILL_LEVEL_REWARD_KEY = "skillLevelRewards";
+	String SHOW_INFOPANEL_KEY = "infopanel";
 
 	@ConfigItem(
 		keyName = "currencyName",
@@ -53,7 +54,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "infopanel",
+		keyName = SHOW_INFOPANEL_KEY,
 		name = "Info Panel",
 		description = "Show the info panel"
 	)

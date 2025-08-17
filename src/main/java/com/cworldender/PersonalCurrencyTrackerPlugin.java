@@ -128,6 +128,7 @@ public class PersonalCurrencyTrackerPlugin extends Plugin
 			switch(configChanged.getKey()) {
 				case PersonalCurrencyTrackerConfig.BALANCE_KEY:
 				case PersonalCurrencyTrackerConfig.SHOW_INFOPANEL_KEY:
+				case PersonalCurrencyTrackerConfig.COIN_TYPE_KEY:
 					updateInfobox();
 					break;
 				case PersonalCurrencyTrackerConfig.NPC_KILL_REWARD_KEY:

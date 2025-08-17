@@ -15,6 +15,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	String NPC_KILL_REWARD_KEY = "npcKillRewards";
 	String SKILL_LEVEL_REWARD_KEY = "skillLevelRewards";
 	String SHOW_INFOPANEL_KEY = "infopanel";
+	String COIN_TYPE_KEY = "cointype";
 
 	@ConfigItem(
 		keyName = "currencyName",
@@ -44,7 +45,7 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	void setBalance(int balance);
 
 	@ConfigItem(
-		keyName = "cointype",
+		keyName = COIN_TYPE_KEY,
 		name = "Coin Type",
 		description = "The type of coin to use as your Currency"
 	)

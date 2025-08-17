@@ -16,9 +16,10 @@ public interface PersonalCurrencyTrackerConfig extends Config
 	String SKILL_LEVEL_REWARD_KEY = "skillLevelRewards";
 	String SHOW_INFOPANEL_KEY = "infopanel";
 	String COIN_TYPE_KEY = "cointype";
+	String CURRENCY_NAME_KEY = "currencyName";
 
 	@ConfigItem(
-		keyName = "currencyName",
+		keyName = CURRENCY_NAME_KEY,
 		name = "Currency Name",
 		description = "The name of your made up currency."
 	)
